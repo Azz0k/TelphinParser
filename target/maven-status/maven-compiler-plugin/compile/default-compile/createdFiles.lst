@@ -1,0 +1,7 @@
+telphin_parser\CallHistory.class
+telphin_parser\ListCallHistoryGet.class
+telphin_parser\CallHistoryGet.class
+telphin_parser\OauthPut.class
+telphin_parser\OauthRes.class
+telphin_parser\App.class
+telphin_parser\CdrResponse.class
