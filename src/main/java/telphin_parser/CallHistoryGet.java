@@ -2,11 +2,19 @@ package telphin_parser;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import com.google.gson.annotations.SerializedName;
 
 public class CallHistoryGet{
+    @SerializedName("call_history")
     private List<CallHistory> callHistory = new LinkedList<CallHistory>();
+
+    @SerializedName("order")
     private String order;
+    
+    @SerializedName("page")
     private long page;
+
+    @SerializedName("per_page")
     private long perPage;
 	public CallHistoryGet(){
 		}
