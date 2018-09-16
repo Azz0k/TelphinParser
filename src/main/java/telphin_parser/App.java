@@ -14,10 +14,17 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
+import java.io.FileInputStream;
+import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import java.io.IOException;
+
 
 import static io.restassured.RestAssured.get;
 
@@ -30,17 +37,91 @@ public class App
  private static String HOST="https://apiproxy.telphin.ru/";
  private static String HOST_OAUTH="oauth/token";
  private static String CALL_HISTORY="api/ver1.0/client/@me/call_history";
+ private static Logger log = Logger.getLogger("TelphinParser");
+ private static FileHandler fileHandler;
+ private static String startDate;
+ private static String endDate;
+ private List<Integer> extensions=new LinkedList<>();
+/*
+-k keys app_id app_secret
+-d date dd.mm.yyyy or today or yesterday
+-e extensions ex. 1,2,3,4
 
+ */
 
-    public static void main( String[] args )
+ public static void main( String[] args )
     {
-        GregorianCalendar gc = new GregorianCalendar();
-        Date today = new Date();
-        today.m
-        LocalDate yesterday =new LocalDate().minusDays(1);
+
+        InitializeLogger();
+        Calendar today = Calendar.getInstance();
+        log.info("Program started");
+
+
+        int argsIndex=0;
+        while (args.length>argsIndex) {
+
+            if (args[argsIndex].equals("-k") || args[argsIndex].equals("-keys"))
+            {
+                APP_ID=args[argsIndex+1];
+                APP_SECRET=args[argsIndex+2];
+                argsIndex+=3;
+                continue;
+            }
+            if (args[argsIndex].equals("-d"))
+            {
+                if  (args[argsIndex].equals("today")) {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.append(today.get(Calendar.YEAR));
+                    stringBuilder.append("-");
+                    stringBuilder.append(today.get(Calendar.MONTH)+1);
+                    stringBuilder.append("-");
+                    stringBuilder.append(today.get(Calendar.DATE));
+                    StringBuilder stringBuilder1 = stringBuilder;
+                    stringBuilder.append(" 04:00:00");
+                    stringBuilder1.append(" 22:00:00");
+                    startDate=stringBuilder.toString();
+                    endDate=stringBuilder1.toString();
+                    argsIndex+=2;
+                }
+
+            }
+        }
+        if (argsIndex==0){
+            FileInputStream fileInputStream;
+            Properties properties = new Properties();
+            try {
+                fileInputStream= new FileInputStream(System.getProperty("user.dir") + "\\telphinparser.ini");
+                properties.load(fileInputStream);
+                APP_ID= properties.getProperty("app_id");
+                APP_SECRET=properties.getProperty("app_secret");
+                String ext=properties.getProperty("extensions");
+
+            }
+        }
+
+
+
+
+
 
         CallHistoryGet callHistoryGet = GetCallHistrory(GetAuthToken(),"2018-09-14 05:00:00","2018-09-14 20:00:00" );
 
+    }
+
+
+    public static void InitializeLogger()
+    {
+        try {
+            fileHandler = new FileHandler(System.getProperty("user.dir") + "\\log.log", 1024 * 1024 * 10, 1);
+            fileHandler.setFormatter(new SimpleFormatter());
+            log.addHandler(fileHandler);
+        }
+        catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Can't create log");
+        }
     }
     public static CallHistoryGet GetCallHistrory(String authToken,String startDateTime,String endDateTime)
     {
@@ -79,4 +160,5 @@ public class App
         else return "";
 
     }
+
 }
