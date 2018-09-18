@@ -102,8 +102,9 @@ public class App
                 APP_SECRET=properties.getProperty("app_secret");
                 String ext=properties.getProperty("extensions");
                 String names=properties.getProperty("names");
+
                 String numbers=properties.getProperty("numbers");
-                Pattern pattern=Pattern.compile("([a-z0-9A-Z]+)");
+                Pattern pattern=Pattern.compile("([a-z0-9A-Zа-яА-Я]+)");
                 Matcher extMatcher=pattern.matcher(ext);
                 Matcher nameMatcher=pattern.matcher(names);
                 Matcher numMatcher=pattern.matcher(numbers);
@@ -115,23 +116,30 @@ public class App
                 System.out.println("Can't open ini file");
             }
         }
-        CallHistoryGet callHistoryGet = GetCallHistrory(GetAuthToken(),"2018-09-14 05:00:00","2018-09-14 20:00:00" );
+        CallHistoryGet callHistoryGet = GetCallHistrory(GetAuthToken(),"2018-09-17 05:00:00","2018-09-17 20:00:00" );
         List<CallHistory> callHistories= callHistoryGet.getHistory();
         for (int i=0;i<managers.size();i++)
-            for (int j=0;j<callHistories.size();j++){
+            for (int j=0;j<callHistories.size();j++) {
 
-            long ext=managers.get(i).getExtensionId();
-            List <CdrResponse> cdr =callHistories.get(j).getCdr();
-            for (int k=0;k<cdr.size();k++)
-            if (ext==cdr.get(k).getExtensionId()){
-                managers.get(i).adAmountOutgoingCalls(1);
-            }
+                long ext = managers.get(i).getExtensionId();
+                List<CdrResponse> cdr = callHistories.get(j).getCdr();
+                for (int k = 0; k < cdr.size(); k++)
+                    if ((ext == cdr.get(k).getExtensionId()) && "NORMAL_CLEARING".equals(cdr.get(k).getHangupCause()) && (validateCallNumber(cdr.get(k).getToUsername()))) {
+                        CdrResponse temp = cdr.get(k);
+                        managers.get(i).adAmountOutgoingCalls(1);
+                    }
 
             }
+         for (Manager a:managers) System.out.println(a.getName()+" "+a.getAmountOutgoingCalls());
         log.info("Program terminated");
     }
 
-
+    public static boolean validateCallNumber(String number)
+    {
+        if (number.length()<4) return false;
+        if (number.contains("*")) return false;
+        return true;
+    }
     public static void InitializeLogger()
     {
         try {
@@ -156,6 +164,7 @@ public class App
         HashMap<String,String> params = new HashMap<>();
         params.put("start_datetime",startDateTime);
         params.put("end_datetime",endDateTime);
+        params.put("flow","out");
         request.headers(header);
         request.params(params);
         request.baseUri(HOST);

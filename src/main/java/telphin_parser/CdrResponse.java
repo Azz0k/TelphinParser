@@ -68,4 +68,12 @@ public class CdrResponse{
     public long getExtensionId() {
         return extensionId;
     }
+
+    public String getHangupCause() {
+        return hangupCause;
+    }
+
+    public String getToUsername() {
+        return toUsername;
+    }
 }
