@@ -6,7 +6,7 @@ import java.awt.image.CropImageFilter;
 import java.util.LinkedList;
 import java.util.List;
 
-public class CallHistory{
+public class CallHistory {
     @SerializedName("bridged_domain")
     private String bridgedDomain;
     @SerializedName("bridged_duration")
@@ -18,7 +18,7 @@ public class CallHistory{
     @SerializedName("call_uuid")
     private String callUuid;
     @SerializedName("cdr")
-    private List<CdrResponse> cdr =new LinkedList<CdrResponse>();
+    private List<CdrResponse> cdr = new LinkedList<CdrResponse>();
     @SerializedName("client_owner_id")
     private long clientOwnerId;
     @SerializedName("did_domain")
@@ -61,6 +61,12 @@ public class CallHistory{
     private String toDomain;
     @SerializedName("to_username")
     private String toUsername;
-	public CallHistory(){
-		}
+
+    public CallHistory() {
+    }
+
+    public List<CdrResponse> getCdr() {
+        return new LinkedList<CdrResponse>(cdr);
+
+    }
 }

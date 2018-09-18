@@ -15,6 +15,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.FileInputStream;
+import java.lang.management.MemoryType;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.time.DayOfWeek;
@@ -24,8 +25,11 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
+import static io.restassured.RestAssured.delete;
 import static io.restassured.RestAssured.get;
 
 
@@ -41,7 +45,8 @@ public class App
  private static FileHandler fileHandler;
  private static String startDate;
  private static String endDate;
- private List<Integer> extensions=new LinkedList<>();
+ private static List<Manager> managers=new LinkedList<>();
+
 /*
 -k keys app_id app_secret
 -d date dd.mm.yyyy or today or yesterday
@@ -54,6 +59,7 @@ public class App
 
         InitializeLogger();
         Calendar today = Calendar.getInstance();
+
         log.info("Program started");
 
 
@@ -95,17 +101,34 @@ public class App
                 APP_ID= properties.getProperty("app_id");
                 APP_SECRET=properties.getProperty("app_secret");
                 String ext=properties.getProperty("extensions");
-
+                String names=properties.getProperty("names");
+                String numbers=properties.getProperty("numbers");
+                Pattern pattern=Pattern.compile("([a-z0-9A-Z]+)");
+                Matcher extMatcher=pattern.matcher(ext);
+                Matcher nameMatcher=pattern.matcher(names);
+                Matcher numMatcher=pattern.matcher(numbers);
+                while ((extMatcher.find()) & (nameMatcher.find()) & (numMatcher.find())) {
+                    managers.add(new Manager(nameMatcher.group(),numMatcher.group(),new Long(extMatcher.group())));
+                }
+            }
+            catch (IOException e) {
+                System.out.println("Can't open ini file");
             }
         }
-
-
-
-
-
-
         CallHistoryGet callHistoryGet = GetCallHistrory(GetAuthToken(),"2018-09-14 05:00:00","2018-09-14 20:00:00" );
+        List<CallHistory> callHistories= callHistoryGet.getHistory();
+        for (int i=0;i<managers.size();i++)
+            for (int j=0;j<callHistories.size();j++){
 
+            long ext=managers.get(i).getExtensionId();
+            List <CdrResponse> cdr =callHistories.get(j).getCdr();
+            for (int k=0;k<cdr.size();k++)
+            if (ext==cdr.get(k).getExtensionId()){
+                managers.get(i).adAmountOutgoingCalls(1);
+            }
+
+            }
+        log.info("Program terminated");
     }
 
 
@@ -157,8 +180,10 @@ public class App
             OauthRes oauthRes = new Gson().fromJson(response.getBody().asString(), OauthRes.class);
             return oauthRes.getAccessToken();
         }
-        else return "";
-
+        else {
+         log.info(response.getStatusLine());
+            return "";
+        }
     }
 
 }

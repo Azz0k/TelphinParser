@@ -63,6 +63,9 @@ public class CdrResponse{
     @SerializedName("to_username")
     private String toUsername;
     public CdrResponse(){
+            }
 
+    public long getExtensionId() {
+        return extensionId;
     }
 }
