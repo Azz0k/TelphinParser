@@ -5,6 +5,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.response.ResponseBody;
 import io.restassured.specification.RequestSpecification;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -13,8 +14,10 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.codehaus.groovy.util.StringUtil;
 
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.lang.management.MemoryType;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
@@ -31,7 +34,9 @@ import java.util.regex.Pattern;
 
 import static io.restassured.RestAssured.delete;
 import static io.restassured.RestAssured.get;
-
+import javax.mail.*;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.events.XMLEvent;
 
 
 public class App 
@@ -54,11 +59,16 @@ public class App
 
  */
 
- public static void main( String[] args )
-    {
+ public static void main( String[] args ) throws Exception {
 
         InitializeLogger();
         Calendar today = Calendar.getInstance();
+        Calendar yesterday = Calendar.getInstance();
+        yesterday.add(Calendar.DAY_OF_MONTH,-1);
+        String [] dates = getDates(yesterday);
+        startDate=dates[0];
+        endDate=dates[1];
+
 
         log.info("Program started");
 
@@ -76,27 +86,19 @@ public class App
             if (args[argsIndex].equals("-d"))
             {
                 if  (args[argsIndex].equals("today")) {
-                    StringBuilder stringBuilder = new StringBuilder();
-                    stringBuilder.append(today.get(Calendar.YEAR));
-                    stringBuilder.append("-");
-                    stringBuilder.append(today.get(Calendar.MONTH)+1);
-                    stringBuilder.append("-");
-                    stringBuilder.append(today.get(Calendar.DATE));
-                    StringBuilder stringBuilder1 = stringBuilder;
-                    stringBuilder.append(" 04:00:00");
-                    stringBuilder1.append(" 22:00:00");
-                    startDate=stringBuilder.toString();
-                    endDate=stringBuilder1.toString();
+                    String [] dates1 = getDates(today);
+                    startDate=dates1[0];
+                    endDate=dates1[1];
                     argsIndex+=2;
+                    continue;
                 }
-
             }
         }
         if (argsIndex==0){
             FileInputStream fileInputStream;
             Properties properties = new Properties();
             try {
-                fileInputStream= new FileInputStream(System.getProperty("user.dir") + "\\telphinparser.ini");
+                fileInputStream= new FileInputStream(System.getProperty("user.dir") + "\\config\\telphinparser.ini");
                 properties.load(fileInputStream);
                 APP_ID= properties.getProperty("app_id");
                 APP_SECRET=properties.getProperty("app_secret");
@@ -114,9 +116,17 @@ public class App
             }
             catch (IOException e) {
                 System.out.println("Can't open ini file");
+                log.info("Can't open ini file");
+
             }
         }
-        CallHistoryGet callHistoryGet = GetCallHistrory(GetAuthToken(),"2018-09-17 05:00:00","2018-09-17 20:00:00" );
+        else
+        {
+            System.out.println("Invalid arguments");
+            log.info("Invalid arguments");
+            System.exit(0);
+        }
+        CallHistoryGet callHistoryGet = GetCallHistrory(GetAuthToken(),startDate,endDate); //"2018-09-18 05:00:00","2018-09-18 20:00:00" );
         List<CallHistory> callHistories= callHistoryGet.getHistory();
         for (int i=0;i<managers.size();i++)
             for (int j=0;j<callHistories.size();j++) {
@@ -131,9 +141,66 @@ public class App
 
             }
          for (Manager a:managers) System.out.println(a.getName()+" "+a.getAmountOutgoingCalls());
+        parseMTS("imap.yandex.ru","mts@bigsto.ru","Qwaszx1!",managers);
         log.info("Program terminated");
     }
+    public static void parseMTS(String host,String imapLogin, String imapPass, List<Manager> managers) throws Exception
+    {
+        Properties properties=new Properties();
+        properties.put("mail.debug", "true");
+        properties.put("mail.store.protocol", "imaps");
+        Session session =Session.getInstance(properties);
+        Store store= session.getStore();
+        try {
+            store.connect(host, imapLogin, imapPass);
+            Folder inbox = store.getFolder("INBOX");
+            inbox.open(Folder.READ_ONLY);
+            for (int i = inbox.getMessageCount(); i > 0; i--) {
+                Message message = inbox.getMessage(i);
+                message.getSubject();
+                Multipart multipart = (Multipart) message.getContent();
+                for (int j = 0; j < multipart.getCount(); j++) {
+                    BodyPart bodyPart = multipart.getBodyPart(j);
+                    if ((!Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())) && StringUtils.isBlank(bodyPart.getFileName()))
+                        continue;
+                    //InputStream inputStream = bodyPart.getInputStream();
+                    //byte [] buf = inputStream.readAllBytes();
+                    //String content=new String(buf);
+                    try {
+                        StaxStreamProcessor processor=new StaxStreamProcessor(bodyPart.getInputStream());
+                        if (processor.doUntil(XMLEvent.START_ELEMENT,"ds")) long number = Long(processor.getAttribute("n"));
+                        else {
+                            log.info("wrong xml");
+                        }
+                    }
 
+                    log.info("OOPS");
+                }
+
+            }
+        }
+        catch (Exception e){
+
+        }
+    }
+    public static String[] getDates(Calendar calendar)
+    {
+        String[] result=new String[2];
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(calendar.get(Calendar.YEAR));
+        stringBuilder.append("-");
+        stringBuilder.append(calendar.get(Calendar.MONTH)+1);
+        stringBuilder.append("-");
+        stringBuilder.append(calendar.get(Calendar.DATE));
+        StringBuilder stringBuilder1 = new StringBuilder(stringBuilder.toString());
+        stringBuilder.append(" 04:00:00");
+        stringBuilder1.append(" 22:00:00");
+        result[0]=stringBuilder.toString();
+        result[1]=stringBuilder1.toString();
+        return result;
+
+
+    }
     public static boolean validateCallNumber(String number)
     {
         if (number.length()<4) return false;
@@ -143,7 +210,7 @@ public class App
     public static void InitializeLogger()
     {
         try {
-            fileHandler = new FileHandler(System.getProperty("user.dir") + "\\log.log", 1024 * 1024 * 10, 1);
+            fileHandler = new FileHandler(System.getProperty("user.dir") + "\\log\\telphinparser.log", 1024 * 1024 * 10, 1);
             fileHandler.setFormatter(new SimpleFormatter());
             log.addHandler(fileHandler);
         }
@@ -194,5 +261,6 @@ public class App
             return "";
         }
     }
+
 
 }

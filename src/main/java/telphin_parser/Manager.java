@@ -5,6 +5,8 @@ public class Manager {
     private String name;
     private String number;
     private long extensionId=0;
+    private String MTSNumber;
+    private long amountMTSOutgoingCalls=0;
     public Manager(String name, String number,long extensionId){
         this.name=name;
         this.number=number;
