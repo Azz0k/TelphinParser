@@ -13,7 +13,7 @@
 <dependency>
     <groupId>javax.mail</groupId>
     <artifactId>mail</artifactId>
-    <version>1.4</version>
+    <version>1.5.0-b01</version>
 </dependency>
 
 <!-- https://mvnrepository.com/artifact/javax.xml.stream/stax-api -->
@@ -71,11 +71,46 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
+		<classpathPrefix>dependency</classpathPrefix>
               <mainClass>telphin_parser.App</mainClass>
             </manifest>
           </archive>
         </configuration>
     </plugin>
+<plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.10</version>
+        <executions>
+            <execution>
+                <id>copydeps</id>
+                <phase>package</phase>
+                <goals>
+                    <goal>copy-dependencies</goal>
+                </goals>
+            </execution>
+        </executions>
+    </plugin>
+    <plugin>
+	<groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+         <executions>
+          <execution>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>telphin_parser.App</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+    </plugin>
+
   </plugins>
 </build>
 

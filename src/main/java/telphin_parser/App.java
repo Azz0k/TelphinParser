@@ -25,6 +25,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.logging.FileHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.io.IOException;
@@ -51,6 +52,7 @@ public class App
  private static String startDate;
  private static String endDate;
  private static List<Manager> managers=new LinkedList<>();
+ private static List<Numbers> mtsNumbers=new LinkedList<>();
 
 /*
 -k keys app_id app_secret
@@ -60,7 +62,8 @@ public class App
  */
 
  public static void main( String[] args ) throws Exception {
-
+     System.err.close();
+     System.setErr(System.out);
         InitializeLogger();
         Calendar today = Calendar.getInstance();
         Calendar yesterday = Calendar.getInstance();
@@ -70,7 +73,35 @@ public class App
         endDate=dates[1];
 
 
-        log.info("Program started");
+    //    log.info("Program started");
+
+     FileInputStream fileInputStream;
+     Properties properties = new Properties();
+     try {
+         fileInputStream= new FileInputStream(System.getProperty("user.dir") + "\\config\\telphinparser.ini");
+         properties.load(fileInputStream);
+         APP_ID= properties.getProperty("app_id");
+         APP_SECRET=properties.getProperty("app_secret");
+         String ext=properties.getProperty("extensions");
+         String names=properties.getProperty("names");
+         String mtsnumbers=properties.getProperty("mtsnumbers");
+         String numbers=properties.getProperty("numbers");
+         Pattern pattern=Pattern.compile("([a-z0-9A-Z\\u0430-\\u044f\\u0410-\\u042f]+)");
+         Matcher extMatcher=pattern.matcher(ext);
+         Matcher nameMatcher=pattern.matcher(names);
+         Matcher numMatcher=pattern.matcher(numbers);
+         Matcher mtsMatcher=pattern.matcher(mtsnumbers);
+         while ((extMatcher.find()) & (nameMatcher.find()) & (numMatcher.find())) {
+             managers.add(new Manager(nameMatcher.group(),numMatcher.group(),new Long(extMatcher.group())));
+         }
+         while ((mtsMatcher.find())) mtsNumbers.add(new Numbers(mtsMatcher.group()));
+
+     }
+     catch (IOException e) {
+         System.out.println("Can't open ini file");
+      //   log.info("Can't open ini file");
+
+     }
 
 
         int argsIndex=0;
@@ -94,38 +125,12 @@ public class App
                 }
             }
         }
-        if (argsIndex==0){
-            FileInputStream fileInputStream;
-            Properties properties = new Properties();
-            try {
-                fileInputStream= new FileInputStream(System.getProperty("user.dir") + "\\config\\telphinparser.ini");
-                properties.load(fileInputStream);
-                APP_ID= properties.getProperty("app_id");
-                APP_SECRET=properties.getProperty("app_secret");
-                String ext=properties.getProperty("extensions");
-                String names=properties.getProperty("names");
-
-                String numbers=properties.getProperty("numbers");
-                Pattern pattern=Pattern.compile("([a-z0-9A-Zа-яА-Я]+)");
-                Matcher extMatcher=pattern.matcher(ext);
-                Matcher nameMatcher=pattern.matcher(names);
-                Matcher numMatcher=pattern.matcher(numbers);
-                while ((extMatcher.find()) & (nameMatcher.find()) & (numMatcher.find())) {
-                    managers.add(new Manager(nameMatcher.group(),numMatcher.group(),new Long(extMatcher.group())));
-                }
-            }
-            catch (IOException e) {
-                System.out.println("Can't open ini file");
-                log.info("Can't open ini file");
-
-            }
-        }
-        else
-        {
+        if (!(argsIndex==0)){
             System.out.println("Invalid arguments");
-            log.info("Invalid arguments");
+         //   log.info("Invalid arguments");
             System.exit(0);
         }
+
         CallHistoryGet callHistoryGet = GetCallHistrory(GetAuthToken(),startDate,endDate); //"2018-09-18 05:00:00","2018-09-18 20:00:00" );
         List<CallHistory> callHistories= callHistoryGet.getHistory();
         for (int i=0;i<managers.size();i++)
@@ -140,49 +145,64 @@ public class App
                     }
 
             }
+            System.out.println("Дата: " +startDate);
          for (Manager a:managers) System.out.println(a.getName()+" "+a.getAmountOutgoingCalls());
-        parseMTS("imap.yandex.ru","mts@bigsto.ru","Qwaszx1!",managers);
-        log.info("Program terminated");
+        parseMTS("imap.yandex.ru","mts@bigsto.ru","Qwaszx1!",mtsNumbers);
+     //   log.info("Program terminated");
     }
-    public static void parseMTS(String host,String imapLogin, String imapPass, List<Manager> managers) throws Exception
-    {
+    public static void parseMTS(String host,String imapLogin, String imapPass, List<Numbers> mts) throws Exception {
         Properties properties=new Properties();
-        properties.put("mail.debug", "true");
+        properties.put("mail.debug", "false");
         properties.put("mail.store.protocol", "imaps");
         Session session =Session.getInstance(properties);
+        session.setDebug(false);
         Store store= session.getStore();
-        try {
+
             store.connect(host, imapLogin, imapPass);
             Folder inbox = store.getFolder("INBOX");
             inbox.open(Folder.READ_ONLY);
-            for (int i = inbox.getMessageCount(); i > 0; i--) {
+            for (int i = inbox.getMessageCount();i>inbox.getMessageCount()-mts.size(); i--) {
                 Message message = inbox.getMessage(i);
-                message.getSubject();
+                String subject=message.getSubject();
                 Multipart multipart = (Multipart) message.getContent();
                 for (int j = 0; j < multipart.getCount(); j++) {
                     BodyPart bodyPart = multipart.getBodyPart(j);
-                    if ((!Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())) && StringUtils.isBlank(bodyPart.getFileName()))
-                        continue;
+                    if ((!Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())) && StringUtils.isBlank(bodyPart.getFileName())) continue;
                     //InputStream inputStream = bodyPart.getInputStream();
                     //byte [] buf = inputStream.readAllBytes();
                     //String content=new String(buf);
-                    try {
+             //       try {
                         StaxStreamProcessor processor=new StaxStreamProcessor(bodyPart.getInputStream());
-                        if (processor.doUntil(XMLEvent.START_ELEMENT,"ds")) long number = Long(processor.getAttribute("n"));
+                        if (processor.doUntil(XMLEvent.START_ELEMENT,"ds"))
+                        {
+                            String number = processor.getAttribute("n");
+                            int index=-1;
+                            for (Numbers temp:mts)
+                                if (number.equals(temp.getNumber())) index=mts.indexOf(temp);
+                            while (processor.doUntil(XMLEvent.START_ELEMENT,"i"))
+                            {
+                                String phoneAttribute=processor.getAttribute("s");
+                                if (phoneAttribute.contains("Телеф."))
+                                {
+                                    String numberAttribute=processor.getAttribute("n");
+                                    if (!(numberAttribute.contains("<"))) mts.get(index).adAmountOutgoingCalls(1);
+                                }
+                            }
+
+                        }// getAttribute("n");}
                         else {
-                            log.info("wrong xml");
+        //                    log.info("wrong xml");
                         }
+           //         }
+               //     catch (Exception e){}
+
                     }
 
-                    log.info("OOPS");
-                }
-
             }
+        for (Numbers temp:mts) System.out.println(temp.getNumber()+" позвонил "+temp.getAmountOutgoingCalls());
         }
-        catch (Exception e){
 
-        }
-    }
+
     public static String[] getDates(Calendar calendar)
     {
         String[] result=new String[2];
@@ -204,15 +224,18 @@ public class App
     public static boolean validateCallNumber(String number)
     {
         if (number.length()<4) return false;
-        if (number.contains("*")) return false;
-        return true;
+        return !number.contains("*");
     }
+
     public static void InitializeLogger()
     {
         try {
+
+            log.setLevel(Level.OFF);
             fileHandler = new FileHandler(System.getProperty("user.dir") + "\\log\\telphinparser.log", 1024 * 1024 * 10, 1);
             fileHandler.setFormatter(new SimpleFormatter());
             log.addHandler(fileHandler);
+            log.setUseParentHandlers(false);
         }
         catch (SecurityException e) {
             e.printStackTrace();
@@ -257,7 +280,7 @@ public class App
             return oauthRes.getAccessToken();
         }
         else {
-         log.info(response.getStatusLine());
+      //   log.info(response.getStatusLine());
             return "";
         }
     }
