@@ -107,29 +107,34 @@ public class App
         int argsIndex=0;
         while (args.length>argsIndex) {
 
-            if (args[argsIndex].equals("-k") || args[argsIndex].equals("-keys"))
-            {
-                APP_ID=args[argsIndex+1];
-                APP_SECRET=args[argsIndex+2];
-                argsIndex+=3;
+            if (args[argsIndex].equals("-k") || args[argsIndex].equals("-keys")) {
+                APP_ID = args[argsIndex + 1];
+                APP_SECRET = args[argsIndex + 2];
+                argsIndex += 3;
                 continue;
             }
-            if (args[argsIndex].equals("-d"))
-            {
-                if  (args[argsIndex].equals("today")) {
-                    String [] dates1 = getDates(today);
-                    startDate=dates1[0];
-                    endDate=dates1[1];
-                    argsIndex+=2;
+            if (args[argsIndex].equals("-d")) {
+                if (args[argsIndex + 1].equals("today")) {
+                    String[] dates1 = getDates(today);
+                    startDate = dates1[0];
+                    endDate = dates1[1];
+                    argsIndex += 2;
                     continue;
+                } else {
+                    startDate = args[argsIndex + 1] + " 04:00:00";
+                    endDate = args[argsIndex + 2] + " 20:00:00";
+                    argsIndex += 3;
+                    continue;
+
                 }
             }
+
         }
-        if (!(argsIndex==0)){
-            System.out.println("Invalid arguments");
+      //  if (!(argsIndex==0)){
+      //      System.out.println("Invalid arguments");
          //   log.info("Invalid arguments");
-            System.exit(0);
-        }
+    //        System.exit(0);
+     //   }
 
         CallHistoryGet callHistoryGet = GetCallHistrory(GetAuthToken(),startDate,endDate); //"2018-09-18 05:00:00","2018-09-18 20:00:00" );
         List<CallHistory> callHistories= callHistoryGet.getHistory();
