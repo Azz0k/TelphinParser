@@ -62,8 +62,8 @@ public class App
  */
 
  public static void main( String[] args ) throws Exception {
-     System.err.close();
-     System.setErr(System.out);
+ //    System.err.close();
+//     System.setErr(System.out);
         InitializeLogger();
         Calendar today = Calendar.getInstance();
         Calendar yesterday = Calendar.getInstance();
@@ -151,13 +151,14 @@ public class App
 
             }
             System.out.println("Дата: " +startDate);
-         for (Manager a:managers) System.out.println(a.getName()+" "+a.getAmountOutgoingCalls());
+
         parseMTS("imap.yandex.ru","mts@bigsto.ru","Qwaszx1!",mtsNumbers);
+     for (Manager a:managers) System.out.println(a.getName()+" "+a.getAmountOutgoingCalls());
      //   log.info("Program terminated");
     }
     public static void parseMTS(String host,String imapLogin, String imapPass, List<Numbers> mts) throws Exception {
         Properties properties=new Properties();
-        properties.put("mail.debug", "false");
+        properties.put("mail.debug", "true");
         properties.put("mail.store.protocol", "imaps");
         Session session =Session.getInstance(properties);
         session.setDebug(false);
@@ -236,11 +237,11 @@ public class App
     {
         try {
 
-            log.setLevel(Level.OFF);
+   //         log.setLevel(Level.OFF);
             fileHandler = new FileHandler(System.getProperty("user.dir") + "\\log\\telphinparser.log", 1024 * 1024 * 10, 1);
             fileHandler.setFormatter(new SimpleFormatter());
             log.addHandler(fileHandler);
-            log.setUseParentHandlers(false);
+   //         log.setUseParentHandlers(false);
         }
         catch (SecurityException e) {
             e.printStackTrace();

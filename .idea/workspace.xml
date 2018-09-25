@@ -111,10 +111,11 @@
       <file leaf-file-name="App.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/telphin_parser/App.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="17">
-              <caret line="168" selection-start-line="168" selection-end-line="168" />
+            <state relative-caret-position="-1445">
+              <caret line="65" column="2" selection-start-line="65" selection-start-column="2" selection-end-line="65" selection-end-column="2" />
               <folding>
                 <element signature="imports" expanded="true" />
+                <element signature="e#11344#11360#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -226,7 +227,6 @@
     </navigator>
     <panes>
       <pane id="Scope" />
-      <pane id="AndroidView" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -285,6 +285,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="AndroidView" />
       <pane id="PackagesPane" />
     </panes>
   </component>
@@ -324,7 +325,6 @@
     <configuration name="TelphinParser" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="telphin_parser.App" />
       <module name="TelphinParser" />
-      <option name="PROGRAM_PARAMETERS" value="-d 2018-09-21 2018-09-21" />
     </configuration>
     <configuration name="AppTest.testValidateCallNumber" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="TelphinParser" />
@@ -388,6 +388,7 @@
       <workItem from="1537774603032" duration="373000" />
       <workItem from="1537778031149" duration="199000" />
       <workItem from="1537786775261" duration="45000" />
+      <workItem from="1537862760772" duration="2078000" />
     </task>
     <servers />
   </component>
@@ -418,7 +419,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="68802000" />
+    <option name="totallyTimeSpent" value="70880000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -435,6 +436,7 @@
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.3297062" />
+      <window_info anchor="bottom" id="Messages" order="11" weight="0.32752994" />
       <window_info anchor="right" id="Palette&#9;" order="5" />
       <window_info id="Image Layers" order="5" />
       <window_info anchor="bottom" id="Regex Tester" order="12" />
@@ -442,27 +444,26 @@
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" weight="0.329718" />
       <window_info anchor="right" id="Maven Projects" order="6" />
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="10" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.33623505" />
+      <window_info anchor="bottom" id="Version Control" order="10" />
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.3297062" />
       <window_info id="Capture Tool" order="6" />
       <window_info id="Designer" order="2" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.15298508" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.15458423" />
       <window_info anchor="right" id="Database" order="4" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info id="UI Designer" order="3" />
       <window_info anchor="right" id="Theme Preview" order="8" />
-      <window_info id="Favorites" order="4" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3960827" />
-      <window_info anchor="bottom" id="Messages" order="11" weight="0.32752994" />
+      <window_info id="Favorites" order="4" side_tool="true" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="right" id="Coverage" order="9" side_tool="true" weight="0.32942432" />
-      <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Inspection Results" order="10" weight="0.3297062" />
     </layout>
   </component>
@@ -477,12 +478,12 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/telphin_parser/App.java</url>
-          <line>154</line>
+          <line>138</line>
           <properties />
-          <option name="timeStamp" value="30" />
+          <option name="timeStamp" value="31" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="31" />
+      <option name="time" value="32" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="Application">
@@ -563,6 +564,7 @@
           <caret line="52" column="21" selection-start-line="52" selection-start-column="21" selection-end-line="52" selection-end-column="21" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="e#11344#11360#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -646,6 +648,7 @@
           <caret line="173" column="25" lean-forward="true" selection-start-line="173" selection-start-column="25" selection-end-line="173" selection-end-column="25" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="e#11344#11360#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -709,6 +712,7 @@
           <caret line="106" column="56" lean-forward="true" selection-start-line="106" selection-start-column="56" selection-end-line="106" selection-end-column="56" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="e#11344#11360#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -880,10 +884,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/telphin_parser/App.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="168" selection-start-line="168" selection-end-line="168" />
+        <state relative-caret-position="-1445">
+          <caret line="65" column="2" selection-start-line="65" selection-start-column="2" selection-end-line="65" selection-end-column="2" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="e#11344#11360#0" expanded="true" />
           </folding>
         </state>
       </provider>
